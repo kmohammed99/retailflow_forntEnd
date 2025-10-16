@@ -1,0 +1,365 @@
+:root {
+  --navbar-h: 64px;
+
+  --side-w-open: 288px;
+  --side-w-closed: 72px;
+  --side-w: var(--side-w-open);
+  /* Navbar.jsx هيعدّلها */
+
+  --amber: #dcbc0f;
+  --ink: #0b0b0b;
+
+  --topbar-bg: #ffffff;
+  --topbar-divider: #e9e9ee;
+
+  --drawer-bg: #26272a;
+  --drawer-bg-active: #10192c;
+  --drawer-text: #cbd5e1;
+  --drawer-border: #1f2937;
+
+  --chip-bg: #0b2540;
+  --chip-text: #93c5fd;
+
+  --page-bg: #eceaf1;
+}
+
+/* ===== NAVBAR ===== */
+.nvbar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  height: var(--navbar-h);
+  background: var(--topbar-bg);
+  /* مهم: مفيش بوردر هنا */
+  border-bottom: 0;
+  display: grid;
+  grid-template-columns: var(--side-w) 140px 1fr auto;
+  align-items: center;
+
+  /* يمنع الـhairline */
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* قطاع أصفر جزء حقيقي من النافبار */
+.nvbar__amber {
+  height: 100%;
+  background: var(--amber);
+  display: grid;
+  place-items: center;
+  padding-inline: 7px;
+
+  border-bottom-right-radius: 0;
+
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* .nvbar::after {
+  content: "";
+  position: absolute;
+  left: var(--side-w);
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--topbar-divider);
+  z-index: 0;
+} */
+
+/* .nvbar__amber::after {
+  content: none;
+} */
+
+
+.nvbar__toggle {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: var(--ink);
+  border: 2px solid var(--ink);
+  padding: 10px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.nvbar__bar {
+  width: 100%;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--amber);
+  transition: transform .2s, opacity .2s;
+}
+
+.nvbar__bar+.nvbar__bar {
+  margin-top: 5px;
+}
+
+.nvbar__toggle.is-open .nvbar__bar:nth-child(2) {
+  opacity: 0;
+}
+
+.nvbar__toggle.is-open .nvbar__bar:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.nvbar__toggle.is-open .nvbar__bar:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* .nvbar__logo {
+  display: flex;
+  align-items: center;
+  padding-inline: 12px;
+} */
+
+/* .nvbar__logo img {
+  height: 28px;
+} */
+
+.nvbar__logo .logo-dd {
+  width: 60px;
+  height: 32px;
+  display: block;
+}
+
+.nvbar__logoText {
+  font-weight: 900;
+  font-size: 22px;
+  color: #d4af37;
+}
+
+.nvbar__titleWrap {
+  text-align: center;
+}
+
+.nvbar__title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+  color: #111;
+}
+
+.nvbar__subtitle {
+  margin-top: 2px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #d4af37;
+}
+
+.nvbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-right: 16px;
+}
+
+.nvbar__iconBtn {
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: #0d0d0d;
+}
+
+.nvbar__iconBtn:hover {
+  background: rgba(0, 0, 0, .06);
+}
+
+/* ===== DRAWER ===== */
+.drawer {
+  position: fixed;
+  top: var(--navbar-h);
+  left: 0;
+  height: calc(100vh - var(--navbar-h));
+  width: var(--side-w);
+  background: var(--drawer-bg);
+  color: var(--drawer-text);
+  border-right: 1px solid var(--drawer-border);
+  padding: 16px 12px;
+  transition: width .25s ease, transform .25s ease;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  border-top-left-radius: 12px;
+}
+
+.drawer__nav {
+  display: grid;
+  gap: 6px;
+}
+
+.drawer__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--drawer-text);
+}
+
+.drawer__item:hover {
+  background: #0d162a;
+  color: #fff;
+}
+
+.drawer__item.is-active {
+  background: var(--drawer-bg-active);
+  color: #fff;
+}
+
+.ic-24 {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+.drawer__icon {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+}
+
+.drawer__icon :where(svg, img) {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+/* ألوان الأيقونات: بتاخد currentColor */
+.drawer__item {
+  color: var(--drawer-text);
+}
+
+.drawer__item .drawer__icon {
+  color: #93c5fd;
+}
+
+/* الافتراضي */
+.drawer__item.is-active .drawer__icon {
+  color: #ffffff;
+}
+
+/* النشط */
+.drawer__item:hover .drawer__icon {
+  color: #ffffff;
+}
+
+/* زرار أيقونات النافبار */
+.nvbar__iconBtn :where(svg, img) {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+.drawer__label {
+  flex: 1;
+  font-size: 14px;
+}
+
+.drawer__badge {
+  min-width: 28px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--chip-bg);
+  color: var(--chip-text);
+  font-size: 12px;
+}
+
+.drawer__divider {
+  height: 1px;
+  background: var(--drawer-border);
+  margin: 12px 8px;
+}
+
+.drawer.collapsed .drawer__label,
+.drawer.collapsed .drawer__badge {
+  display: none;
+}
+
+.drawer.collapsed .drawer__item {
+  justify-content: center;
+}
+
+.drawer__backdrop {
+  position: fixed;
+  inset: 0;
+  top: var(--navbar-h);
+  background: rgba(0, 0, 0, .35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s;
+}
+
+.drawer__backdrop.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ===== CONTENT ===== */
+.app-content {
+  margin-top: var(--navbar-h);
+  margin-left: var(--side-w);
+  min-height: calc(100vh - var(--navbar-h));
+  background: var(--page-bg);
+  transition: margin-left .25s ease;
+  padding: 100px 0;
+  /* الجتّرز هتبقى جوه page-center */
+}
+
+/* وعاء مركزي موحّد لكل الصفحات */
+.page-center {
+  width: min(1500px, 100%);
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+
+/* بطاقة كبيرة تلف كل محتوى الصفحة */
+.page-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  box-shadow: 0 14px 18px rgba(0, 0, 0, .06);
+  padding: 24px;
+}
+
+/* Mobile behaviour */
+@media (max-width: 1024px) {
+
+  /* خليه 72px عشان الزر يبان، والمحتوى مش هيتزحزح لأن --side-w = 0 */
+  .nvbar {
+    grid-template-columns: 72px 110px 1fr auto;
+  }
+
+  .drawer {
+    width: 288px;
+    transform: translateX(-100%);
+  }
+
+  .drawer.open {
+    transform: translateX(0);
+  }
+}
+
+/* اختياري: بدون زوايا */
+.nvbar__amber {
+  border-bottom-right-radius: 0;
+}
+
+.drawer {
+  border-top-left-radius: 0;
+}
+
+html,
+body,
+.app-content {
+  overflow-x: hidden;
+}

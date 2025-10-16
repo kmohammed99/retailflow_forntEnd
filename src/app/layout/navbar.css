@@ -1,0 +1,137 @@
+/* :root {
+    --amber: #d6b10f;
+    --ink: #0b0b0b;
+    --topbar-bg: #ffffff;
+    --topbar-divider: #e9e9ee;
+}
+
+.nvbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    height: var(--navbar-h);
+    background: var(--topbar-bg);
+    border-bottom: 1px solid var(--topbar-divider);
+
+    display: grid;
+    grid-template-columns: var(--side-w) 140px 1fr auto;
+    align-items: center;
+}
+
+.nvbar__amber {
+    height: 100%;
+    background: var(--amber);
+    border-bottom-right-radius: 12px;
+    display: grid;
+    place-items: center;
+    padding-inline: 8px;
+}
+
+.nvbar__toggle {
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    background: var(--ink);
+    border: 2px solid var(--ink);
+    padding: 10px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+}
+
+.nvbar__bar {
+    width: 100%;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--amber);
+    transition: transform .2s ease, opacity .2s ease;
+}
+
+.nvbar__bar+.nvbar__bar {
+    margin-top: 5px;
+}
+
+.nvbar__toggle.is-open .nvbar__bar:nth-child(2) {
+    opacity: 0;
+}
+
+.nvbar__toggle.is-open .nvbar__bar:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+
+.nvbar__toggle.is-open .nvbar__bar:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+}
+
+.nvbar__logo {
+    display: flex;
+    align-items: center;
+    padding-inline: 12px;
+}
+
+.nvbar__logo img {
+    height: 28px;
+    width: auto;
+}
+
+.nvbar__logoText {
+    font-weight: 900;
+    font-size: 22px;
+    color: #d4af37;
+}
+
+.nvbar__titleWrap {
+    text-align: center;
+}
+
+.nvbar__title {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 800;
+    color: #111;
+}
+
+.nvbar__subtitle {
+    margin-top: 2px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #d4af37;
+}
+
+.nvbar__actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-right: 16px;
+}
+
+.nvbar__iconBtn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: transparent;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    color: #0d0d0d;
+}
+
+.nvbar__iconBtn:hover {
+    background: rgba(0, 0, 0, .06);
+}
+
+@media (max-width: 768px) {
+    .nvbar {
+        grid-template-columns: var(--side-w) 110px 1fr auto;
+    }
+
+    .nvbar__title {
+        font-size: 22px;
+    }
+
+    .nvbar__subtitle {
+        font-size: 13px;
+    }
+} */
