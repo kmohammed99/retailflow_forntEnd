@@ -1,5 +1,6 @@
 import React from "react";
 import "./dashboard.css";
+import { NavLink } from "react-router-dom";
 
 export default function DashboardPage() {
   const kpis = [
@@ -39,15 +40,18 @@ export default function DashboardPage() {
       <section className="db-orders" aria-labelledby="recent-orders-h">
         <div className="db-headbar">
           <h2 id="recent-orders-h" className="db-h2">Recent Orders</h2>
+
+
           <div className="db-actions">
-            <button className="db-action" type="button">
+            <NavLink to="/orders/new" className="db-action">
               <span className="db-action-dot">＋</span>
               <span>Add Order</span>
-            </button>
-            <button className="db-action" type="button">
+            </NavLink>
+
+            <NavLink to="/expenses/new" className="db-action">
               <span className="db-action-dot">$</span>
               <span>Add Expense</span>
-            </button>
+            </NavLink>
           </div>
         </div>
 

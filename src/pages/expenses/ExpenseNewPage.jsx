@@ -49,7 +49,7 @@ export default function ExpenseNewPage() {
             <option>Office</option>
             <option>Shipping</option>
             <option>Ads</option>
-            <option>Salaries</option>
+            <option>Matirials</option>
           </select>
         </div>
 
@@ -64,7 +64,7 @@ export default function ExpenseNewPage() {
           >
             <option value="" hidden>Select…</option>
             <option>Cash</option>
-            <option>Card</option>
+            <option>visa</option>
             <option>Wallet</option>
           </select>
         </div>
@@ -79,13 +79,28 @@ export default function ExpenseNewPage() {
             className="h-12 w-full rounded-xl border border-gray-300 bg-white px-4 pr-10 text-[15px] shadow-sm outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-200"
           >
             <option value="" hidden>Select…</option>
-            <option>1</option>
-            <option>2</option>
-            <option>3</option>
-            <option>4</option>
+            <option>summer collection 2025</option>
+            <option>winter collection 2025</option>
+            <option>summer collection 2026</option>
+            <option>winter collection 2026</option>
           </select>
         </div>
-
+        {/* Supplier Name */}
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-semibold text-gray-700">Supplier Name</label>
+          <select
+            name="SupplierName"
+            value={form.SupplierName}
+            onChange={onChange}
+            className="h-12 w-full rounded-xl border border-gray-300 bg-white px-4 pr-10 text-[15px] shadow-sm outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-200"
+          >
+            <option value="" hidden>Select…</option>
+            <option>Cotton candy</option>
+            <option>gary tex</option>
+            <option>logo</option>
+            <option>jesion</option>
+          </select>
+        </div>
         {/* Description (full row) */}
         <div className="md:col-span-2 flex flex-col gap-2">
           <label className="text-sm font-semibold text-gray-700">Expense Description</label>

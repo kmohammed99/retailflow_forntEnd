@@ -105,8 +105,8 @@ export default function Navbar({
           <NavItem to={ROUTES.orders} label="Orders" icon={<OrderIc className="ic-24" />} onClick={closeIfMobile} />
           <NavItem to={ROUTES.inventory} label="Inventory"  icon={<InventoryIc className="ic-24" />} onClick={closeIfMobile} />
           <NavItem to={ROUTES.expenses} label="Expenses"  icon={<ExpensesIc className="ic-24" />} onClick={closeIfMobile} />
-          <NavItem to={ROUTES.shipping} label="Shipping" icon={<ShippingIc className="ic-24" />} onClick={closeIfMobile} />
-          <NavItem to={ROUTES.reports} label="Reports" icon={<ReportsIc className="ic-24" />} onClick={closeIfMobile} />
+          <NavItem to={ROUTES.ShippingPage} label="Shipping" icon={<ShippingIc className="ic-24" />} onClick={closeIfMobile} />
+          <NavItem to={ROUTES.ReportsPage} label="Reports" icon={<ReportsIc className="ic-24" />} onClick={closeIfMobile} />
           <NavItem to={ROUTES.settings} label="Settings" icon={<SettingsIc className="ic-24" />} onClick={closeIfMobile} />
 
         </nav>
