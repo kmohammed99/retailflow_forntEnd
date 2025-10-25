@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { createProduct } from "../../api/apiClient";
 
 export default function NewProductPage() {
   const [form, setForm] = useState({
@@ -21,14 +22,35 @@ export default function NewProductPage() {
       return { ...f, colors: Array.from(next) };
     });
 
-  const change = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+  const change = (e) =>
+    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    console.log("new product:", form);
+
+    const payload = {
+      brandId: 1,
+      name: form.name,
+      category: form.category,
+      sku: form.sku,
+      colors: form.colors,
+      sizes: form.sizes.split(",").map((s) => s.trim()),
+      costPrice: parseFloat(form.cost),
+      sellingPrice: parseFloat(form.price),
+      minimumStock: parseInt(form.minAlert),
+      totalQuantity: parseInt(form.totalQty),
+    };
+
+    try {
+      const data = await createProduct(payload);
+      alert("✅ Product created successfully!");
+      console.log("Server response:", data);
+    } catch (err) {
+      console.error("❌ Error creating product:", err);
+      alert("Error creating product. Check console for details.");
+    }
   };
 
-  // ألوان جاهزة للـ chips
   const palette = [
     { hex: "#b91c1c", name: "Red" },
     { hex: "#111827", name: "Black" },
@@ -44,7 +66,6 @@ export default function NewProductPage() {
       </h2>
 
       <form onSubmit={submit} className="space-y-3">
-        {/* ============ Product INFO ============ */}
         <SectionTitle>Product INFO.</SectionTitle>
 
         <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
@@ -77,7 +98,7 @@ export default function NewProductPage() {
             </div>
           </Field>
 
-          <Field label="Product Code//SKU">
+          <Field label="Product Code // SKU">
             <input
               name="sku"
               value={form.sku}
@@ -86,7 +107,7 @@ export default function NewProductPage() {
             />
           </Field>
 
-          {/* Color as real input field */}
+          {/* Color Selector */}
           <Field className="md:col-span-2" label="Color">
             <div className="relative">
               <div className="flex h-12 items-center gap-3 overflow-x-auto rounded-xl border border-gray-300 bg-white px-4 text-[15px]">
@@ -108,14 +129,15 @@ export default function NewProductPage() {
                   );
                 })}
               </div>
-              {/* سهم صوري علشان شكل الفيلد يفضل موحّد */}
               <Caret />
             </div>
-            {/* قيم مختارة تظهر تحت الفيلد */}
             {form.colors.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-2">
                 {form.colors.map((hex) => (
-                  <span key={hex} className="rounded-full border px-3 py-1 text-xs font-bold">
+                  <span
+                    key={hex}
+                    className="rounded-full border px-3 py-1 text-xs font-bold"
+                  >
                     {hex}
                   </span>
                 ))}
@@ -123,7 +145,7 @@ export default function NewProductPage() {
             )}
           </Field>
 
-          <Field label="Size">
+          <Field label="Sizes">
             <input
               name="sizes"
               value={form.sizes}
@@ -135,8 +157,7 @@ export default function NewProductPage() {
 
         <Divider />
 
-        {/* ============ Pricing & Stock ============ */}
-        <SectionTitle>Pricing &amp; Stock.</SectionTitle>
+        <SectionTitle>Pricing & Stock.</SectionTitle>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <Field label="Cost Price.">
@@ -161,21 +182,25 @@ export default function NewProductPage() {
 
         <Divider />
 
-        {/* ============ Size Quantity ============ */}
         <SectionTitle>Size Quantity.</SectionTitle>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {/* جدول مقادير المقاسات */}
           <div className="rounded-2xl border border-gray-200 p-4">
             <div className="mb-3 text-lg font-extrabold">Sizes</div>
             <div className="divide-y">
               {["M", "L", "XL", "XXL"].map((s) => (
-                <div key={s} className="grid grid-cols-3 items-center gap-3 py-2">
+                <div
+                  key={s}
+                  className="grid grid-cols-3 items-center gap-3 py-2"
+                >
                   <div className="col-span-1 text-sm font-bold">{s}</div>
                   <input
                     value={form.sizeQty[s]}
                     onChange={(e) =>
-                      setForm((f) => ({ ...f, sizeQty: { ...f.sizeQty, [s]: e.target.value } }))
+                      setForm((f) => ({
+                        ...f,
+                        sizeQty: { ...f.sizeQty, [s]: e.target.value },
+                      }))
                     }
                     className="col-span-2 h-10 rounded-lg border border-gray-300 bg-white px-3 text-[15px] outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-200"
                   />
@@ -184,7 +209,6 @@ export default function NewProductPage() {
             </div>
           </div>
 
-          {/* التنبيهات والكميّة الكلّية */}
           <div className="grid grid-cols-1 gap-4">
             <Field label="Minimum Stock Alert.">
               <input
@@ -207,7 +231,6 @@ export default function NewProductPage() {
           </div>
         </div>
 
-        {/* Save */}
         <div className="mt-2 flex w-full justify-end">
           <button
             type="submit"
