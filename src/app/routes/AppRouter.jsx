@@ -16,8 +16,7 @@ import ShippingNewPage from "../../pages/shipping/ShippingNewPage";
 import ReportsPage from "../../pages/reports/ReportsPage";
 import AddCityPage from "../../pages/shipping/AddCityPage";
 import EditShippingPage from "../../pages/shipping/EditShippingPage";
-import ViewExpensePage from "@/pages/expenses/ViewExpensePage";
-import EditExpensePage from "@/pages/expenses/EditExpensePage";
+import EditOrderPage from "@/pages/orders/EditOrderPage";
 
 
 export default function AppRouter() {
@@ -38,8 +37,6 @@ export default function AppRouter() {
           <Route path={ROUTES.shippingNewPage} element={<ShippingNewPage />} />
           <Route path="/shipping/add-city" element={<AddCityPage />} />
           <Route path="/edit-shipping/:id" element={<EditShippingPage />} />
-          <Route path="/expenses/:id/view" element={<ViewExpensePage />} />
-          <Route path="/expenses/:id/edit" element={<EditExpensePage />} />
           <Route path={ROUTES.settings} element={<SettingsPage />} />
           <Route path={ROUTES.ReportsPage} element={<ReportsPage />} />
           <Route path="*" element={<div style={{ padding: 24 }}>Not Found</div>} />
