@@ -11,6 +11,7 @@ import {
   Pencil,
   Save,
   X,
+  Search
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -97,11 +98,14 @@ export default function OrdersListPage() {
               placeholder="Search by Order ID, Customer, or Phone"
             />
             <span className="pointer-events-none absolute inset-y-0 left-3 grid place-items-center text-gray-500">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              {/* <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M10 18a8 8 0 1 1 5.292-14.01L21 9.7l-1.4 1.4-4.3-4.3A8 8 0 0 1 10 18z" />
-              </svg>
+              </svg> */}
+              <Search size={18} />
+
             </span>
           </div>
+
           <NavLink
             to={ROUTES.ordersNew}
             className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2 font-semibold 
@@ -310,9 +314,8 @@ function FiltersBar() {
             <button
               key={s}
               onClick={() => setActive(s)}
-              className={`rounded-full px-4 py-2 text-sm font-semibold transition shadow-[0_4px_12px_rgba(0,0,0,.06)] ${
-                s === active ? "bg-[#111] text-white" : "bg-white text-gray-800 border border-gray-300 hover:bg-gray-50"
-              }`}
+              className={`rounded-full px-4 py-2 text-sm font-semibold transition shadow-[0_4px_12px_rgba(0,0,0,.06)] ${s === active ? "bg-[#111] text-white" : "bg-white text-gray-800 border border-gray-300 hover:bg-gray-50"
+                }`}
             >
               {s}
             </button>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { NavLink } from "react-router-dom";
 import {
   Search, Package, CheckCircle2, AlertTriangle, XOctagon,
@@ -7,54 +7,116 @@ import {
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 
-const initialRows = Array.from({ length: 10 }).map((_, i) => ({
-  img: "https://via.placeholder.com/44x44",
-  code: String(1000 + i),
-  name: ["Black Polo", "White Tee", "Dibo Hoodie", "Classic Suit", "Jogger Pants"][i % 5],
-  qty: [12, 4, 0, 18, 9][i % 5],
-  totalSell: [20, 4, 15, 8, 12][i % 5],
-  category: ["T-Shirt", "Suit", "Hoodie", "Sweatpants", "Polo"][i % 5],
-  price: "1200 L.E",
-  status: ["In Stock", "Low Stock", "Out of Stock"][i % 3],
-}));
+// ✅ عدّل المسار حسب مكان الملف
+import {
+  getAllProducts,
+  updateProduct,
+  deleteProduct as apiDeleteProduct,
+} from "../../api/products"; // لو الملف تحت src/pages/ استخدم "../api/products"
 
 export default function InventoryPage() {
-  const [products, setProducts] = useState(initialRows);
+  const [products, setProducts] = useState([]);
   const [selected, setSelected] = useState(null);
-  const [mode, setMode] = useState(null); // view | edit
+  const [mode, setMode] = useState(null);
   const [filter, setFilter] = useState("All");
+  const [loading, setLoading] = useState(false);
 
   const statuses = ["All", "In Stock", "Low Stock", "Out of Stock"];
 
-  const filteredProducts =
-    filter === "All" ? products : products.filter((x) => x.status === filter);
+  // ===== Fetch & map =====
+  const fetchAndSet = async () => {
+    try {
+      setLoading(true);
+      const data = await getAllProducts(); // بيعمل unwrap لو ResponseTransaction
+      const mapped = (data || []).map((p) => ({
+        id: p.id,
+        code: p.sku,
+        name: p.name,
+        qty: p.totalQuantity ?? 0,
+        totalSell: p.totalSell ?? 0,
+        category: p.category ?? "—",
+        price: p.sellingPrice ?? 0,
+        brandId: p.brandId ?? null,
+        status:
+          (p.totalQuantity ?? 0) === 0
+            ? "Out of Stock"
+            : (p.totalQuantity ?? 0) < (p.minimumStock ?? 5)
+              ? "Low Stock"
+              : "In Stock",
+      }));
+      setProducts(mapped);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load products");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAndSet();
+  }, []);
+
+  const filteredProducts = useMemo(
+    () => (filter === "All" ? products : products.filter((x) => x.status === filter)),
+    [products, filter]
+  );
 
   const openView = (p) => { setSelected(p); setMode("view"); };
   const openEdit = (p) => { setSelected(p); setMode("edit"); };
   const closePopup = () => { setSelected(null); setMode(null); };
 
-  const handleSave = () => {
-    setProducts((prev) =>
-      prev.map((x) => (x.code === selected.code ? selected : x))
-    );
-    toast.success("✅ Product updated successfully!", {
-      style: { borderRadius: "10px", background: "#111", color: "#fff" },
-    });
-    closePopup();
+  // ====== Save (PUT) + refresh ======
+  const handleSave = async () => {
+    if (!selected) return;
+    try {
+      console.log("✅ handleSave clicked");
+      const payload = {
+        id: selected.id,
+        brandId: selected.brandId ?? 2,      // مؤقتًا
+        name: selected.name,
+        category: selected.category || "General",
+        code: String(selected.code),         // هتتترجم لـ sku في API layer
+        price: parseFloat(selected.price) || 0,
+        qty: parseInt(selected.qty) || 0,
+      };
+      console.log("🚀 Sending update payload:", payload);
+
+      await updateProduct(selected.id, payload);
+      await fetchAndSet();                   // ✅ تحديث الجدول بالكامل
+      toast.success("✅ Product updated successfully!", {
+        style: { borderRadius: "10px", background: "#111", color: "#fff" },
+      });
+      closePopup();
+    } catch (err) {
+      console.error("❌ Update failed:", err);
+      toast.error("❌ Failed to update product", {
+        style: { borderRadius: "10px", background: "#111", color: "#fff" },
+      });
+    }
   };
 
-  const handleDelete = (code) => {
+  // ===== Delete (API + refresh) =====
+  const handleDelete = (id) => {
     toast((t) => (
       <div>
         <p className="font-semibold mb-2">Delete this product?</p>
         <div className="flex gap-3">
           <button
-            onClick={() => {
-              setProducts((prev) => prev.filter((x) => x.code !== code));
-              toast.dismiss(t.id);
-              toast.success("🗑️ Product deleted!", {
-                style: { borderRadius: "10px", background: "#111", color: "#fff" },
-              });
+            onClick={async () => {
+              try {
+                await apiDeleteProduct(id);
+                await fetchAndSet(); // ✅ تحديث الجدول
+                toast.dismiss(t.id);
+                toast.success("🗑️ Product deleted!", {
+                  style: { borderRadius: "10px", background: "#111", color: "#fff" },
+                });
+              } catch (err) {
+                console.error(err);
+                toast.error("Failed to delete", {
+                  style: { borderRadius: "10px", background: "#111", color: "#fff" },
+                });
+              }
             }}
             className="bg-red-500 text-white px-3 py-1 rounded-md text-sm font-semibold"
           >
@@ -73,7 +135,6 @@ export default function InventoryPage() {
 
   return (
     <section className="space-y-6">
-      {/* ===== Header ===== */}
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <h1 className="text-3xl font-extrabold tracking-tight">Inventory.</h1>
         <div className="flex items-center gap-3 w-full md:w-auto">
@@ -81,6 +142,7 @@ export default function InventoryPage() {
             <input
               className="h-11 w-full rounded-xl border border-gray-300 bg-white pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-gray-200"
               placeholder="Search by Product name, Code, or Category"
+            // TODO: hook up client-side search
             />
             <span className="pointer-events-none absolute inset-y-0 left-3 grid place-items-center text-gray-500">
               <Search size={18} />
@@ -95,37 +157,18 @@ export default function InventoryPage() {
         </div>
       </div>
 
-      {/* ===== Stat Cards ===== */}
+      {/* ===== Stats ===== */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
-        <StatCard icon={<Package className="h-5 w-5" />} label="Total Products" value="124" tone="amber" />
-        <StatCard icon={<CheckCircle2 className="h-5 w-5" />} label="In Stock" value="97" tone="indigo" />
-        <StatCard icon={<AlertTriangle className="h-5 w-5" />} label="Low Stock" value="18" tone="blue" />
-        <StatCard icon={<XOctagon className="h-5 w-5" />} label="Out of Stock" value="9" tone="red" />
-        <StatCard icon={<CircleDollarSign className="h-5 w-5" />} label="Total Value" value="178,250" tone="green" />
-      </div>
-
-      {/* ===== Filter ===== */}
-      <div>
-        <div className="mb-2 text-sm font-semibold">Status Filter.</div>
-        <div className="flex flex-wrap gap-3">
-          {statuses.map((s) => {
-            const active = filter === s;
-            return (
-              <button
-                key={s}
-                onClick={() => setFilter(s)}
-                className={[
-                  "rounded-full px-4 py-2 text-sm font-semibold transition shadow-[0_4px_12px_rgba(0,0,0,.06)]",
-                  active
-                    ? "bg-[#111] text-white"
-                    : "bg-white text-gray-800 border border-gray-300 hover:bg-gray-50",
-                ].join(" ")}
-              >
-                {s}
-              </button>
-            );
-          })}
-        </div>
+        <StatCard icon={<Package className="h-5 w-5" />} label="Total Products" value={products.length} tone="amber" />
+        <StatCard icon={<CheckCircle2 className="h-5 w-5" />} label="In Stock" value={products.filter(p => p.status === "In Stock").length} tone="indigo" />
+        <StatCard icon={<AlertTriangle className="h-5 w-5" />} label="Low Stock" value={products.filter(p => p.status === "Low Stock").length} tone="blue" />
+        <StatCard icon={<XOctagon className="h-5 w-5" />} label="Out of Stock" value={products.filter(p => p.status === "Out of Stock").length} tone="red" />
+        <StatCard
+          icon={<CircleDollarSign className="h-5 w-5" />}
+          label="Total Value"
+          value={products.reduce((sum, p) => sum + ((parseFloat(p.price) || 0) * (parseInt(p.qty) || 0)), 0)}
+          tone="green"
+        />
       </div>
 
       {/* ===== Table ===== */}
@@ -137,36 +180,42 @@ export default function InventoryPage() {
           <div className="col-span-1 text-right">Quantity</div>
           <div className="col-span-1 text-right">Total Sell</div>
           <div className="col-span-2">Category</div>
-          <div className="col-span-1">Price</div>
+          <div className="col-span-1 text-right">Price</div>
           <div className="col-span-1">Status</div>
           <div className="col-span-1 text-right">Actions</div>
         </div>
 
-        {filteredProducts.map((p) => (
-          <motion.div
-            key={p.code}
-            layout
-            initial={{ opacity: 0, scale: 0.97 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.25 }}
-            className="grid grid-cols-12 items-center gap-3 border-t px-4 py-3 text-sm"
-          >
-            <div className="col-span-1"><img src={p.img} className="h-11 w-11 rounded-md object-cover" /></div>
-            <div className="col-span-1">{p.code}</div>
-            <div className="col-span-3">{p.name}</div>
-            <div className="col-span-1 text-right">{p.qty}</div>
-            <div className="col-span-1 text-right">{p.totalSell}</div>
-            <div className="col-span-2">{p.category}</div>
-            <div className="col-span-1">{p.price}</div>
-            <div className="col-span-1"><StockPill status={p.status} /></div>
-            <div className="col-span-1 flex items-center justify-end gap-2">
-              <button onClick={() => openView(p)} className="rounded-lg border px-2 py-1 hover:bg-gray-50" title="View"><Eye size={16} /></button>
-              <button onClick={() => openEdit(p)} className="rounded-lg border px-2 py-1 hover:bg-gray-50" title="Edit"><Pencil size={16} /></button>
-              <button onClick={() => handleDelete(p.code)} className="rounded-lg border px-2 py-1 hover:bg-gray-50" title="Delete"><Trash2 size={16} /></button>
-            </div>
-          </motion.div>
-        ))}
+        {loading ? (
+          <div className="p-6 text-center text-gray-500">Loading products...</div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="p-6 text-center text-gray-500">No products found.</div>
+        ) : (
+          filteredProducts.map((p) => (
+            <motion.div
+              key={p.id}
+              layout
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.25 }}
+              className="grid grid-cols-12 items-center gap-3 border-t px-4 py-3 text-sm"
+            >
+              <div className="col-span-1"><img src={p.img} className="h-11 w-11 rounded-md object-cover" /></div>
+              <div className="col-span-1">{p.code}</div>
+              <div className="col-span-3">{p.name}</div>
+              <div className="col-span-1 text-right">{p.qty}</div>
+              <div className="col-span-1 text-right">{p.totalSell}</div>
+              <div className="col-span-2">{p.category}</div>
+              <div className="col-span-1 text-right">{p.price}</div>
+              <div className="col-span-1"><StockPill status={p.status} /></div>
+              <div className="col-span-1 flex items-center justify-end gap-2">
+                <button onClick={() => openView(p)} className="rounded-lg border px-2 py-1 hover:bg-gray-50" title="View"><Eye size={16} /></button>
+                <button onClick={() => openEdit(p)} className="rounded-lg border px-2 py-1 hover:bg-gray-50" title="Edit"><Pencil size={16} /></button>
+                <button onClick={() => handleDelete(p.id)} className="rounded-lg border px-2 py-1 hover:bg-gray-50" title="Delete"><Trash2 size={16} /></button>
+              </div>
+            </motion.div>
+          ))
+        )}
       </div>
 
       {/* ===== Popups ===== */}
@@ -177,10 +226,9 @@ export default function InventoryPage() {
             onClose={closePopup}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-700">
-              {["name","code","category","qty","totalSell","price"].map((f) => (
+              {["name", "code", "category", "qty", "totalSell", "price", "status"].map((f) => (
                 <Field key={f} label={f} mode={mode} selected={selected} setSelected={setSelected} />
               ))}
-              <Field label="Status" mode={mode} selected={selected} setSelected={setSelected} isSelect />
             </div>
 
             {mode === "edit" && (
@@ -206,19 +254,17 @@ export default function InventoryPage() {
   );
 }
 
-/* ====== Popup ====== */
+/* ===== Components ===== */
 function Popup({ title, onClose, children }) {
   return (
-    <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-    >
+    <motion.div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.8, opacity: 0 }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
-        className="w-[95%] max-w-3xl rounded-2xl bg-white p-8 shadow-[0_8px_28px_rgba(0,0,0,.12)] ring-1 ring-slate-200 overflow-y-auto max-h-[90vh]"
+        transition={{ duration: 0.3 }}
+        className="w-[95%] max-w-3xl rounded-2xl bg-white p-8 shadow ring-1 ring-slate-200 overflow-y-auto max-h-[90vh]"
       >
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-extrabold">{title}</h2>
@@ -232,7 +278,6 @@ function Popup({ title, onClose, children }) {
   );
 }
 
-/* ====== Field Component ====== */
 function Field({ label, mode, selected, setSelected, isSelect = false }) {
   const name = label;
   return (
@@ -264,7 +309,6 @@ function Field({ label, mode, selected, setSelected, isSelect = false }) {
   );
 }
 
-/* ====== Stat Card ====== */
 function StatCard({ icon, label, value, tone = "amber" }) {
   const tones = {
     amber: { ring: "ring-slate-200", stripe: "#dcbc0f" },
@@ -275,9 +319,9 @@ function StatCard({ icon, label, value, tone = "amber" }) {
   };
   const t = tones[tone];
   return (
-    <div className={`relative rounded-2xl bg-white p-5 shadow-[0_8px_28px_rgba(0,0,0,.08)] ring-1 ${t.ring}`}>
+    <div className={`relative rounded-2xl bg-white p-5 shadow ring-1 ${t.ring}`}>
       <div className="flex items-center gap-4">
-        <div className="grid h-10 w-10 place-items-center rounded-xl bg-black text-[var(--amber)] shadow-[0_8px_16px_rgba(0,0,0,.25)]">{icon}</div>
+        <div className="grid h-10 w-10 place-items-center rounded-xl bg-black text-[var(--amber)] shadow">{icon}</div>
         <div>
           <div className="text-[16px] font-bold text-gray-600">{label}</div>
           <div className="truncate text-2xl font-bold text-[#0f172a]">{value}</div>
@@ -288,7 +332,6 @@ function StatCard({ icon, label, value, tone = "amber" }) {
   );
 }
 
-/* ====== Stock Pill ====== */
 function StockPill({ status }) {
   const map = {
     "In Stock": "bg-emerald-100 text-emerald-700",

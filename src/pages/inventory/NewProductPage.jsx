@@ -1,7 +1,11 @@
 import React, { useState } from "react";
-import { createProduct } from "../../api/apiClient";
+import { useNavigate } from "react-router-dom";
+// ✅ المسار حسب مكان الملف (لو تحت src/pages/inventory/ فالمسار التالي صحيح)
+import { createProduct } from "../../api/products";
 
 export default function NewProductPage() {
+  const navigate = useNavigate();
+
   const [form, setForm] = useState({
     name: "",
     category: "",
@@ -28,23 +32,28 @@ export default function NewProductPage() {
   const submit = async (e) => {
     e.preventDefault();
 
+    const sizesList = (form.sizes || "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
     const payload = {
-      brandId: 1,
+      brandId: 2,
       name: form.name,
-      category: form.category,
-      sku: form.sku,
+      category: form.category || "General",
+      sku: String(form.sku),
       colors: form.colors,
-      sizes: form.sizes.split(",").map((s) => s.trim()),
-      costPrice: parseFloat(form.cost),
-      sellingPrice: parseFloat(form.price),
-      minimumStock: parseInt(form.minAlert),
-      totalQuantity: parseInt(form.totalQty),
+      sizes: sizesList.length ? sizesList : ["Free"],
+      costPrice: parseFloat(form.cost || "0") || 0,
+      sellingPrice: parseFloat(form.price || "0") || 0,
+      minimumStock: parseInt(form.minAlert || "0") || 0,
+      totalQuantity: parseInt(form.totalQty || "0") || 0,
     };
 
     try {
-      const data = await createProduct(payload);
-      alert("✅ Product created successfully!");
-      console.log("Server response:", data);
+      await createProduct(payload);
+      // ✅ رجع للإنفنتوري وخليها تعمل fetch من جديد
+      navigate("/inventory", { replace: true });
     } catch (err) {
       console.error("❌ Error creating product:", err);
       alert("Error creating product. Check console for details.");
